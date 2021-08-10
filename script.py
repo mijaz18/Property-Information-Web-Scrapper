@@ -35,7 +35,7 @@ class House:
 
 
 def main():
-    avenues = ['Normandy Ave','Woodbine Ave', 'Sherwood Ave','Warwick Ave','Wellington Ave','Kenwood Ave',]
+    avenues = ['Genesee St', 'Brooks Ave' ]
     for ave in avenues:
 
         url = "https://maps.cityofrochester.gov/arcgis/rest/services/App_PropertyInformation/AppPropInfo_locator_280/GeocodeServer/findAddressCandidates"
@@ -83,7 +83,7 @@ def main():
         #Loop through all houses
         filename = str(ave)+ '.csv'
         f = open(filename,'w')
-        f.write('PSTLADDRESS,PSTLCITY,OWNERNME1,PROPERTYTYPE,CURRENT_TOTAL_VALUE,SALE_DATE,SALE_PRICE,CLASSDSCRP,STORIES,BEDS,BATHS \n')
+        f.write('PSTLADDRESS,PSTLCITY,SITEADDRESS,OWNERNME1,PROPERTYTYPE,CURRENT_TOTAL_VALUE,SALE_DATE,SALE_PRICE,CLASSDSCRP,STORIES,BEDS,BATHS \n')
         for location in avenue.locations:
 
             url = "https://maps.cityofrochester.gov/arcgis/rest/services/App_PropertyInformation/ROC_Parcel_Query_RPS/MapServer/0/query"
@@ -112,7 +112,7 @@ def main():
             #     'cache-control': "private, must-revalidate, max-age=0"
             #     }
             url = "https://maps.cityofrochester.gov/arcgis/rest/services/App_PropertyInformation/ROC_Parcel_Query_RPS/MapServer/0/query"
-            payload = "f=json&where=&returnGeometry=false&spatialRel=esriSpatialRelIntersects&geometry=%7B%22x%22%3A%22"+str(location.x)+"%22%2C%22y%22%3A%22"+str(location.y)+"%22%2C%22spatialReference%22%3A%7B%22wkid%22%3A"+str(avenue.wkid)+"%2C%22latestWkid%22%3A"+str(avenue.latestWkid)+"%7D%7D&geometryType=esriGeometryPoint&inSR="+str(avenue.wkid)+"&outFields=PSTLADDRESS,PSTLCITY,OWNERNME1,PROPERTYTYPE,CURRENT_TOTAL_VALUE,SALE_DATE,SALE_PRICE,CLASSDSCRP&outSR="+str(avenue.wkid)
+            payload = "f=json&where=&returnGeometry=false&spatialRel=esriSpatialRelIntersects&geometry=%7B%22x%22%3A%22"+str(location.x)+"%22%2C%22y%22%3A%22"+str(location.y)+"%22%2C%22spatialReference%22%3A%7B%22wkid%22%3A"+str(avenue.wkid)+"%2C%22latestWkid%22%3A"+str(avenue.latestWkid)+"%7D%7D&geometryType=esriGeometryPoint&inSR="+str(avenue.wkid)+"&outFields=PSTLADDRESS,SITEADDRESS,PSTLCITY,OWNERNME1,PROPERTYTYPE,CURRENT_TOTAL_VALUE,SALE_DATE,SALE_PRICE,CLASSDSCRP&outSR="+str(avenue.wkid)
             headers = {
                 'Content-Type': "application/x-www-form-urlencoded",
                 'cache-control': "private, must-revalidate, max-age=0"
@@ -129,26 +129,34 @@ def main():
             l3 = l2[2].split(',')
             # print(l3)
             l4 = l3[0].split(':')
+            # print(l4[1])
             pstladdress = l4[1]
+            l12 = l4[1].split(',')
+            # print("L12", l12)
             l5 = l3[1].split(':')
-            pstlcity = l5[1] + l3[2]
-            l6 = l3[3].split(':')
+            siteaddress= l5[1]
+            # print(siteaddress)
+            # print(l3[2].split(':'))
+            # print("L5 2",l3[3])
+            pstlcity = l3[2].split(':')[1] + l3[3]
+            l6 = l3[4].split(':')
+            # print("L6", l6)
             ownername = l6[1]
-            l7 = l3[4].split(':')
+            l7 = l3[5].split(':')
             if len(l7)>1:
                 proptype = l7[1]
             else:
                 proptype= -1
-            l8 = l3[5].split(':')
+            l8 = l3[6].split(':')
             if len(l8)>1:
                 currvalue = l8[1]
             else:
                 currvalue= -1
-            l9 = l3[6].split(':')
+            l9 = l3[7].split(':')
             saledate = l9[1]
-            l10 = l3[7].split(':')
+            l10 = l3[8].split(':')
             saleprice = l10[1]
-            l11 = l3[8].split(':')
+            l11 = l3[9].split(':')
             if len(l11)>1:
                 l12 = l11[1].split('}')
                 classdscrp = l12[0]
@@ -183,7 +191,7 @@ def main():
                 baths = l7[0]
                 # print(stories, beds, baths)
 
-                f.write(str(pstladdress)+','+str(pstlcity)+','+str(ownername)+','+str(proptype)+','+str(currvalue)+','+str(saledate)+','+str(saleprice)+','+str(classdscrp)+','+str(stories)+','+str(beds)+','+str(baths)+ '\n')
+                f.write(str(pstladdress)+','+str(pstlcity)+','+str(siteaddress)+','+str(ownername)+','+str(proptype)+','+str(currvalue)+','+str(saledate)+','+str(saleprice)+','+str(classdscrp)+','+str(stories)+','+str(beds)+','+str(baths)+ '\n')
 
             
         f.close()
